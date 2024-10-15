@@ -8,15 +8,16 @@ AMI_ID="ami-06b21ccaeff8cd686"
 INSTANCE_TYPE="t2.micro"
 KEY_NAME="vockey"
 INSTANCE_NAME="prueba"
-SECURITY_GROUP_ID="sg-preview-1"
  
-# Crear el grupo de seguridad
-aws ec2 create-security-group \
+# Crear el grupo de seguridad y almacenar el ID en una variable
+SECURITY_GROUP_ID=$(aws ec2 create-security-group \
     --group-name "$SECURITY_GROUP_NAME" \
     --description "$SECURITY_GROUP_DESCRIPTION" \
-    --vpc-id "$VPC_ID"
+    --vpc-id "$VPC_ID" \
+    --query 'GroupId' \
+    --output text)
  
-echo "Grupo de seguridad '$SECURITY_GROUP_NAME' creado en la VPC '$VPC_ID'."
+echo "Grupo de seguridad '$SECURITY_GROUP_NAME' creado con ID: $SECURITY_GROUP_ID en la VPC '$VPC_ID'."
  
 # Configurar las reglas de acceso del grupo de seguridad (SSH - Puerto 22)
 aws ec2 authorize-security-group-ingress \
@@ -30,7 +31,7 @@ aws ec2 authorize-security-group-ingress \
  
 echo "Regla de ingreso SSH agregada al grupo de seguridad $SECURITY_GROUP_ID."
  
-# Crear la instancia EC2 con las opciones configuradas
+# Crear la instancia EC2 con el grupo de seguridad creado
 aws ec2 run-instances \
     --image-id "$AMI_ID" \
     --instance-type "$INSTANCE_TYPE" \
