@@ -1,0 +1,45 @@
+#!/bin/bash
+ 
+# Variables
+SECURITY_GROUP_NAME="launch-wizard-1"
+SECURITY_GROUP_DESCRIPTION="launch-wizard-1 created $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")"
+VPC_ID="vpc-06194fe09dcfd6bb4"
+AMI_ID="ami-06b21ccaeff8cd686"
+INSTANCE_TYPE="t2.micro"
+KEY_NAME="vockey"
+INSTANCE_NAME="prueba"
+SECURITY_GROUP_ID="sg-preview-1"
+ 
+# Crear el grupo de seguridad
+aws ec2 create-security-group \
+    --group-name "$SECURITY_GROUP_NAME" \
+    --description "$SECURITY_GROUP_DESCRIPTION" \
+    --vpc-id "$VPC_ID"
+ 
+echo "Grupo de seguridad '$SECURITY_GROUP_NAME' creado en la VPC '$VPC_ID'."
+ 
+# Configurar las reglas de acceso del grupo de seguridad (SSH - Puerto 22)
+aws ec2 authorize-security-group-ingress \
+    --group-id "$SECURITY_GROUP_ID" \
+    --ip-permissions '{
+        "IpProtocol": "tcp",
+        "FromPort": 22,
+        "ToPort": 22,
+        "IpRanges": [{"CidrIp": "0.0.0.0/0"}]
+    }'
+ 
+echo "Regla de ingreso SSH agregada al grupo de seguridad $SECURITY_GROUP_ID."
+ 
+# Crear la instancia EC2 con las opciones configuradas
+aws ec2 run-instances \
+    --image-id "$AMI_ID" \
+    --instance-type "$INSTANCE_TYPE" \
+    --key-name "$KEY_NAME" \
+    --network-interfaces "AssociatePublicIpAddress=true,DeviceIndex=0,Groups=[$SECURITY_GROUP_ID]" \
+    --credit-specification '{"CpuCredits":"standard"}' \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$INSTANCE_NAME}]" \
+    --metadata-options '{"HttpEndpoint":"enabled","HttpPutResponseHopLimit":2,"HttpTokens":"required"}' \
+    --private-dns-name-options '{"HostnameType":"ip-name","EnableResourceNameDnsARecord":true,"EnableResourceNameDnsAAAARecord":false}' \
+    --count "1"
+ 
+echo "Instancia EC2 con el nombre '$INSTANCE_NAME' creada y etiquetada."
