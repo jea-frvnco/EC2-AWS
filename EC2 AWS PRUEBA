@@ -1,15 +1,15 @@
 #!/bin/bash
  
 # Variables
-SECURITY_GROUP_NAME="launch-wizard-1"
-SECURITY_GROUP_DESCRIPTION="launch-wizard-1 created $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")"
+SECURITY_GROUP_NAME="security group"
+SECURITY_GROUP_DESCRIPTION="security group created $(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")"
 VPC_ID="vpc-06194fe09dcfd6bb4"
 AMI_ID="ami-06b21ccaeff8cd686"
 INSTANCE_TYPE="t2.micro"
 KEY_NAME="vockey"
 INSTANCE_NAME="prueba"
  
-# Crear el grupo de seguridad y almacenar el ID en una variable
+# Creación del grupo de seguridad y almacenar el ID en una variable
 SECURITY_GROUP_ID=$(aws ec2 create-security-group \
     --group-name "$SECURITY_GROUP_NAME" \
     --description "$SECURITY_GROUP_DESCRIPTION" \
@@ -19,7 +19,7 @@ SECURITY_GROUP_ID=$(aws ec2 create-security-group \
  
 echo "Grupo de seguridad '$SECURITY_GROUP_NAME' creado con ID: $SECURITY_GROUP_ID en la VPC '$VPC_ID'."
  
-# Configurar las reglas de acceso del grupo de seguridad (SSH - Puerto 22)
+# Configuración de las reglas de acceso del grupo de seguridad (SSH - Puerto 22)
 aws ec2 authorize-security-group-ingress \
     --group-id "$SECURITY_GROUP_ID" \
     --ip-permissions '{
@@ -31,7 +31,7 @@ aws ec2 authorize-security-group-ingress \
  
 echo "Regla de ingreso SSH agregada al grupo de seguridad $SECURITY_GROUP_ID."
  
-# Crear la instancia EC2 con el grupo de seguridad creado
+# Creación de la instancia EC2 con el grupo de seguridad creado
 aws ec2 run-instances \
     --image-id "$AMI_ID" \
     --instance-type "$INSTANCE_TYPE" \
